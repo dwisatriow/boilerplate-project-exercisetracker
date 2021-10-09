@@ -12,6 +12,9 @@
 		"express": "^4.16.4",
 		"mongoose": "^6.0.8"
 	},
+	"engines": {
+		"node": "14.x"
+	},
 	"repository": {
 		"url": "https://github.com/freeCodeCamp/boilerplate-project-exercisetracker"
 	},
