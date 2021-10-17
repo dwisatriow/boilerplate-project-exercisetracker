@@ -42,12 +42,21 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
 
-// Setup mongoose schema and model
+// Setup schema
 const userSchema = new Schema({
-  username: String,
+  username: String
 });
 
+const exerciseSchema = new Schema({
+  username: String,
+  description: String,
+  duration: Number,
+  date: { type: Date, default: Date.now },
+});
+
+// Setup model
 const User = mongoose.model("User", userSchema);
+const Exercise = mongoose.model("Exercise", exerciseSchema);
 
 // Create new user api
 app.post("/api/users", function (req, res) {
@@ -71,6 +80,40 @@ app.get("/api/users", function (req, res) {
   User.find({}, "username id", function (err, docs) {
     if (err) return console.error(err);
     res.json(docs);
+  });
+});
+
+// Add exercises api
+app.post("/api/users/:id/exercises", function (req, res) {
+  const id = req.params.id;
+  User.findById(id, "id username", function (err, user) {
+    if (err) console.error(err);
+
+    const username = user.username;
+    const id = user.id;
+    const description = req.body.description;
+    const duration = Number(req.body.duration);
+    const date = req.body.date ? Date.parse(req.body.date) : Date.now();
+
+    const newExercise = new Exercise({
+      username: username,
+      description : description,
+      duration : duration,
+      date : date,
+    });
+
+    
+    newExercise.save(function (err, newExercise) {
+      if (err) return console.error(err);
+
+      res.json({
+        username: newExercise.username,
+        description : newExercise.description,
+        duration : newExercise.duration,
+        date : newExercise.date.toDateString(),
+        _id: id
+      })
+    });
   });
 });
 
