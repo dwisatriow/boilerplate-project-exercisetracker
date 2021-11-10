@@ -77,15 +77,16 @@ app.post("/api/users", function (req, res) {
 
 // Get all users api
 app.get("/api/users", function (req, res) {
-  User.find({}, "username id", function (err, docs) {
+  User.find({}, "username id", function (err, users) {
     if (err) return console.error(err);
-    res.json(docs);
+    res.json(users);
   });
 });
 
 // Add exercises api
-app.post("/api/users/:id/exercises", function (req, res) {
-  const id = req.params.id;
+app.post("/api/users/:_id/exercises", function (req, res) {
+  const id = req.params._id;
+
   User.findById(id, "id username", function (err, user) {
     if (err) console.error(err);
 
@@ -113,6 +114,37 @@ app.post("/api/users/:id/exercises", function (req, res) {
         date : newExercise.date.toDateString(),
         _id: id
       })
+    });
+  });
+});
+
+// Get exercises log api
+app.get("/api/users/:_id/logs", function (req, res) {
+  const id = req.params._id;
+
+  User.findById(id, "username", function (err, user) {
+    if (err) console.error(err);
+
+    const username = user.username;
+
+    Exercise.find({ username: username }, "description duration date", function (err, exercises) {
+      if (err) console.error(err);
+
+      const exerciseCount = exercises.length;
+      const exerciseList = exercises.map(function (exercise) {
+        return {
+          description : exercise.description,
+          duration : exercise.duration,
+          date : exercise.date.toDateString(),
+        }
+      })
+
+      res.json({
+        username: username,
+        count: exerciseCount,
+        _id: id,
+        log: exerciseList
+      });
     });
   });
 });
