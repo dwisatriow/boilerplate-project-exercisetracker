@@ -94,7 +94,9 @@ app.post("/api/users/:_id/exercises", function (req, res) {
     const id = user.id;
     const description = req.body.description;
     const duration = Number(req.body.duration);
-    const date = req.body.date ? Date.parse(req.body.date) : Date.now();
+    const date = isNaN(Date.parse(req.body.date)) ?
+      Date.now() :
+      Date.parse(req.body.date);
 
     const newExercise = new Exercise({
       username: username,
@@ -124,9 +126,6 @@ app.get("/api/users/:_id/logs", function (req, res) {
   const from = req.query.from;
   const to = req.query.to;
   const limit = req.query.limit;
-
-  // console.log(id, from, to, limit);
-  // res.send("response message");
 
   User.findById(id, "username", function (err, user) {
     if (err) console.error(err);
