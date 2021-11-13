@@ -121,13 +121,31 @@ app.post("/api/users/:_id/exercises", function (req, res) {
 // Get exercises log api
 app.get("/api/users/:_id/logs", function (req, res) {
   const id = req.params._id;
+  const from = req.query.from;
+  const to = req.query.to;
+  const limit = req.query.limit;
+
+  // console.log(id, from, to, limit);
+  // res.send("response message");
 
   User.findById(id, "username", function (err, user) {
     if (err) console.error(err);
 
     const username = user.username;
+    let queryFilter = { username: username };
+    let queryOptions = {};
 
-    Exercise.find({ username: username }, "description duration date", function (err, exercises) {
+    if (from || to) {
+      queryFilter.date = {};
+      if (from) queryFilter.date.$gte = Date.parse(from);
+      if (to) queryFilter.date.$lte = Date.parse(to);
+    }
+
+    if (limit) queryOptions.limit = Number(limit);
+
+    const exerciseQuery = Exercise.find(queryFilter, "description duration date", queryOptions);
+
+    exerciseQuery.exec(function (err, exercises) {
       if (err) console.error(err);
 
       const exerciseCount = exercises.length;
